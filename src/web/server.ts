@@ -40,19 +40,26 @@ export function startServer(port: number): http.Server {
 
   const server = http.createServer(app);
 
-  // WebSocket server for browser real-time connection
+  // WebSocket servers (noServer mode for path-based routing)
   const wss = new WebSocketServer({ noServer: true });
+  const echoWss = new WebSocketServer({ noServer: true });
 
   server.on('upgrade', (request, socket, head) => {
-    if (request.url === '/api/ws') {
+    const url = request.url ?? '';
+    if (url === '/api/ws') {
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit('connection', ws, request);
+      });
+    } else if (url === '/api/echo') {
+      echoWss.handleUpgrade(request, socket, head, (ws) => {
+        echoWss.emit('connection', ws, request);
       });
     } else {
       socket.destroy();
     }
   });
 
+  // Browser relay WebSocket
   wss.on('connection', (ws) => {
     browserClients.add(ws);
 
@@ -68,6 +75,19 @@ export function startServer(port: number): http.Server {
 
     ws.on('close', () => {
       browserClients.delete(ws);
+    });
+  });
+
+  // Built-in echo server for demo/testing
+  echoWss.on('connection', (ws) => {
+    ws.on('message', (data) => {
+      const msg = data.toString();
+      try {
+        const parsed = JSON.parse(msg);
+        ws.send(JSON.stringify({ echo: true, original: parsed, timestamp: Date.now() }));
+      } catch {
+        ws.send(`echo: ${msg}`);
+      }
     });
   });
 
