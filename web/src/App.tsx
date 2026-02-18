@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useApp } from './context/AppContext';
 import { useLang } from './context/LangContext';
 import { useTheme } from './context/ThemeContext';
@@ -12,6 +12,48 @@ import ValidatePanel from './components/ValidatePanel';
 import DocsPage from './components/DocsPage';
 import LandingPage from './components/LandingPage';
 
+const isRemote = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+function DemoWelcomeModal({ onClose, onDocs }: { onClose: () => void; onDocs: () => void }) {
+  const { t } = useLang();
+  const dontShowRef = useRef<HTMLInputElement>(null);
+
+  const handleClose = () => {
+    if (dontShowRef.current?.checked) {
+      localStorage.setItem('ws-tester-demo-dismissed', '1');
+    }
+    onClose();
+  };
+
+  return (
+    <div className="demo-overlay" onClick={handleClose}>
+      <div className="demo-modal" onClick={e => e.stopPropagation()}>
+        <div className="demo-modal-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <h2>{t('demo.title')}</h2>
+        <p dangerouslySetInnerHTML={{ __html: t('demo.description') }} />
+        <p dangerouslySetInnerHTML={{ __html: t('demo.selfHostHint') }} />
+        <div className="demo-modal-code">
+          docker run -p 3456:3456 ghcr.io/manikosto/ws-tester
+        </div>
+        <div className="demo-modal-actions">
+          <button className="primary" onClick={handleClose}>{t('demo.gotIt')}</button>
+          <div className="demo-modal-secondary-row">
+            <label className="demo-modal-check">
+              <input type="checkbox" ref={dontShowRef} />
+              {t('demo.dontShow')}
+            </label>
+            <button onClick={() => { handleClose(); onDocs(); }}>{t('demo.docsLink')}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const { state, dispatch } = useApp();
   const { lang, setLang, t } = useLang();
@@ -19,11 +61,19 @@ export default function App() {
   const [page, setPage] = useState<'landing' | 'dashboard' | 'docs'>('landing');
   const [rightTab, setRightTab] = useState<'loadtest' | 'validate'>('loadtest');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   useBackendWebSocket(dispatch);
 
+  const openDashboard = () => {
+    setPage('dashboard');
+    if (isRemote && localStorage.getItem('ws-tester-demo-dismissed') !== '1') {
+      setShowDemoModal(true);
+    }
+  };
+
   if (page === 'landing') {
-    return <LandingPage onOpenDashboard={() => setPage('dashboard')} onOpenDocs={() => setPage('docs')} />;
+    return <LandingPage onOpenDashboard={openDashboard} onOpenDocs={() => setPage('docs')} />;
   }
 
   if (page === 'docs') {
@@ -32,6 +82,12 @@ export default function App() {
 
   return (
     <div className="app">
+      {showDemoModal && (
+        <DemoWelcomeModal
+          onClose={() => setShowDemoModal(false)}
+          onDocs={() => { setShowDemoModal(false); setPage('docs'); }}
+        />
+      )}
       <header className="header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button

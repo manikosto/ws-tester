@@ -274,6 +274,20 @@ const translations = {
 
   // Footer
   'landing.footer.builtWith': { en: 'Built with TypeScript', ru: 'Написан на TypeScript' },
+
+  // === Demo Welcome Modal ===
+  'demo.title': { en: 'Welcome to ws-tester Demo', ru: 'Добро пожаловать в демо ws-tester' },
+  'demo.description': {
+    en: 'This is a <strong>live demo</strong> — feel free to explore all features: connect, send messages, record sessions, run load tests, and validate schemas.',
+    ru: 'Это <strong>живое демо</strong> — попробуйте все функции: подключение, отправку сообщений, запись сессий, нагрузочные тесты и валидацию схем.',
+  },
+  'demo.selfHostHint': {
+    en: 'To use ws-tester with <strong>your own projects</strong>, deploy it on your infrastructure — it takes one command:',
+    ru: 'Чтобы использовать ws-tester с <strong>вашими проектами</strong>, разверните его на своей инфраструктуре — одной командой:',
+  },
+  'demo.docsLink': { en: 'Read Documentation', ru: 'Документация' },
+  'demo.gotIt': { en: 'Got it, open Dashboard', ru: 'Понятно, открыть дашборд' },
+  'demo.dontShow': { en: "Don't show again", ru: 'Больше не показывать' },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
