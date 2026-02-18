@@ -16,7 +16,8 @@ import type {
 
 export function createApiRouter(
   sessionManager: SessionManager,
-  broadcast: (envelope: WsEnvelope) => void
+  broadcast: (envelope: WsEnvelope) => void,
+  serverPort?: number
 ): Router {
   const router = Router();
 
@@ -28,9 +29,25 @@ export function createApiRouter(
       return;
     }
 
+    // Rewrite own echo endpoint to localhost to avoid hairpin NAT issues
+    let connectUrl = body.url;
+    try {
+      const parsed = new URL(connectUrl);
+      if (parsed.pathname === '/api/echo' || parsed.pathname === '/api/echo/') {
+        const host = req.get('host') ?? '';
+        const isSelf = parsed.host === host
+          || parsed.hostname === 'localhost'
+          || parsed.hostname === '127.0.0.1';
+        if (isSelf) {
+          const port = serverPort ?? parseInt(host.split(':')[1] || '3456', 10);
+          connectUrl = `ws://127.0.0.1:${port}/api/echo`;
+        }
+      }
+    } catch { /* invalid URL — let WebSocketManager handle it */ }
+
     try {
       const manager = new WebSocketManager({
-        url: body.url,
+        url: connectUrl,
         headers: body.headers,
         timeout: body.timeout ?? 10000,
         reconnect: body.reconnect ?? false,

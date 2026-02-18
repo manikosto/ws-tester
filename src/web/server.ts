@@ -28,7 +28,7 @@ export function startServer(port: number): http.Server {
   }
 
   // Mount API routes
-  const apiRouter = createApiRouter(sessionManager, broadcast);
+  const apiRouter = createApiRouter(sessionManager, broadcast, port);
   app.use('/api', apiRouter);
 
   // Serve frontend in production
