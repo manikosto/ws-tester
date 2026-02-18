@@ -21,6 +21,24 @@ export function createApiRouter(
 ): Router {
   const router = Router();
 
+  /** Rewrite own echo endpoint to localhost to avoid hairpin NAT issues in containers */
+  function rewriteEchoUrl(url: string, req: Request): string {
+    try {
+      const parsed = new URL(url);
+      if (parsed.pathname === '/api/echo' || parsed.pathname === '/api/echo/') {
+        const host = req.get('host') ?? '';
+        const isSelf = parsed.host === host
+          || parsed.hostname === 'localhost'
+          || parsed.hostname === '127.0.0.1';
+        if (isSelf) {
+          const port = serverPort ?? parseInt(host.split(':')[1] || '3456', 10);
+          return `ws://127.0.0.1:${port}/api/echo`;
+        }
+      }
+    } catch { /* invalid URL — let caller handle it */ }
+    return url;
+  }
+
   // --- Connect ---
   router.post('/connect', async (req: Request, res: Response) => {
     const body = req.body as ConnectRequest;
@@ -29,21 +47,7 @@ export function createApiRouter(
       return;
     }
 
-    // Rewrite own echo endpoint to localhost to avoid hairpin NAT issues
-    let connectUrl = body.url;
-    try {
-      const parsed = new URL(connectUrl);
-      if (parsed.pathname === '/api/echo' || parsed.pathname === '/api/echo/') {
-        const host = req.get('host') ?? '';
-        const isSelf = parsed.host === host
-          || parsed.hostname === 'localhost'
-          || parsed.hostname === '127.0.0.1';
-        if (isSelf) {
-          const port = serverPort ?? parseInt(host.split(':')[1] || '3456', 10);
-          connectUrl = `ws://127.0.0.1:${port}/api/echo`;
-        }
-      }
-    } catch { /* invalid URL — let WebSocketManager handle it */ }
+    const connectUrl = rewriteEchoUrl(body.url, req);
 
     try {
       const manager = new WebSocketManager({
@@ -142,8 +146,10 @@ export function createApiRouter(
       return;
     }
 
+    const loadTestUrl = rewriteEchoUrl(body.url, req);
+
     const tester = new LoadTester({
-      url: body.url,
+      url: loadTestUrl,
       connections: body.connections,
       duration: body.duration,
       message: body.message,
