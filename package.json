@@ -1,0 +1,55 @@
+{
+  "name": "ws-tester",
+  "version": "1.0.0",
+  "description": "WebSocket Connection Tester — connect, send/receive, record/replay, load test, validate schemas",
+  "author": "manikosto",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manikosto/ws-tester.git"
+  },
+  "homepage": "https://github.com/manikosto/ws-tester",
+  "bugs": "https://github.com/manikosto/ws-tester/issues",
+  "main": "dist/index.js",
+  "bin": {
+    "ws-tester": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "web/dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "web": "node dist/index.js web",
+    "web:build": "npm run build && cd web && npm install && npm run build"
+  },
+  "keywords": ["websocket", "ws", "testing", "load-testing", "cli", "dashboard", "record", "replay", "schema-validation"],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "ora": "^8.1.1",
+    "ws": "^8.18.0",
+    "express": "^4.21.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
