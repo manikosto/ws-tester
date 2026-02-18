@@ -41,9 +41,9 @@ export type AppAction =
 
 const initialState: AppState = {
   sessionId: null,
-  url: typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-    ? `wss://${window.location.host}/api/echo`
-    : 'ws://localhost:8085',
+  url: typeof window !== 'undefined'
+    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/echo`
+    : 'ws://localhost:3456/api/echo',
   connectionStatus: 'disconnected',
   messages: [],
   loadTest: {
