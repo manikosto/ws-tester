@@ -8,6 +8,7 @@ export default function ConnectionPanel() {
   const { t } = useLang();
   const api = useApi();
   const [url, setUrl] = useState(state.url);
+  const [pingInterval, setPingInterval] = useState('');
 
   const isConnected = state.connectionStatus === 'connected';
   const isConnecting = state.connectionStatus === 'connecting';
@@ -15,7 +16,10 @@ export default function ConnectionPanel() {
   async function handleConnect() {
     dispatch({ type: 'CONNECTING' });
     try {
-      const result = await api.connect(url);
+      const ping = parseInt(pingInterval, 10);
+      const result = await api.connect(url, {
+        pingInterval: ping > 0 ? ping * 1000 : undefined,
+      });
       dispatch({ type: 'CONNECTED', payload: { sessionId: result.sessionId, url } });
     } catch (err: unknown) {
       dispatch({ type: 'CONNECTION_ERROR', payload: (err as Error).message });
@@ -52,6 +56,19 @@ export default function ConnectionPanel() {
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !isConnected && !isConnecting) handleConnect();
           }}
+        />
+      </div>
+
+      <div className="form-group">
+        <label>{t('connection.pingInterval')}</label>
+        <input
+          type="number"
+          value={pingInterval}
+          onChange={(e) => setPingInterval(e.target.value)}
+          placeholder="0"
+          min="0"
+          style={{ width: 80 }}
+          disabled={isConnected || isConnecting}
         />
       </div>
 

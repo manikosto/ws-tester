@@ -15,8 +15,8 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 
 export function useApi() {
   return {
-    connect: (url: string, headers?: Record<string, string>) =>
-      post<{ sessionId: string; status: string; url: string }>('/connect', { url, headers }),
+    connect: (url: string, opts?: { headers?: Record<string, string>; pingInterval?: number }) =>
+      post<{ sessionId: string; status: string; url: string }>('/connect', { url, ...opts }),
 
     disconnect: (sessionId: string) =>
       post<{ status: string }>('/disconnect', { sessionId }),

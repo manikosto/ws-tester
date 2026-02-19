@@ -16,6 +16,7 @@ const translations = {
   'connection.connected': { en: 'connected', ru: 'подключено' },
   'connection.disconnected': { en: 'disconnected', ru: 'отключено' },
   'connection.error': { en: 'error', ru: 'ошибка' },
+  'connection.pingInterval': { en: 'Ping (s)', ru: 'Пинг (с)' },
 
   // === Send Panel ===
   'send.title': { en: 'Send Message', ru: 'Отправить сообщение' },

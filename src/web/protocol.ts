@@ -31,6 +31,7 @@ export interface ConnectRequest {
   headers?: Record<string, string>;
   timeout?: number;
   reconnect?: boolean;
+  pingInterval?: number;
 }
 
 export interface SendRequest {

@@ -10,7 +10,8 @@ export function registerConnectCommand(program: Command): void {
     .option('-H, --header <headers...>', 'Custom headers (key:value)')
     .option('-r, --reconnect', 'Auto-reconnect on disconnect', false)
     .option('-t, --timeout <ms>', 'Connection timeout in ms', '10000')
-    .action(async (url: string, opts: { header?: string[]; reconnect: boolean; timeout: string }) => {
+    .option('--ping-interval <seconds>', 'Send WebSocket ping every N seconds to keep alive')
+    .action(async (url: string, opts: { header?: string[]; reconnect: boolean; timeout: string; pingInterval?: string }) => {
       const headers: Record<string, string> = {};
       if (opts.header) {
         for (const h of opts.header) {
@@ -24,6 +25,7 @@ export function registerConnectCommand(program: Command): void {
         headers,
         reconnect: opts.reconnect,
         timeout: parseInt(opts.timeout, 10),
+        pingInterval: opts.pingInterval ? parseInt(opts.pingInterval, 10) * 1000 : undefined,
       });
 
       manager.onMessage((data) => Logger.received(data));

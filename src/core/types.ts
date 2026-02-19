@@ -5,6 +5,7 @@ export interface ConnectionOptions {
   reconnect?: boolean;
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
+  pingInterval?: number;
 }
 
 export interface RecordedMessage {

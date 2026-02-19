@@ -7,6 +7,7 @@ export class WebSocketManager extends EventEmitter {
   private options: ConnectionOptions;
   private reconnectAttempts = 0;
   private isClosedManually = false;
+  private pingTimer?: ReturnType<typeof setInterval>;
 
   constructor(options: ConnectionOptions) {
     super();
@@ -41,6 +42,7 @@ export class WebSocketManager extends EventEmitter {
       this.ws.on('open', () => {
         clearTimeout(timeoutId);
         this.reconnectAttempts = 0;
+        this.startPing();
         const connectionTime = Date.now() - startTime;
         this.emit('connected', { connectionTime });
         resolve();
@@ -61,6 +63,7 @@ export class WebSocketManager extends EventEmitter {
 
       this.ws.on('close', (code: number, reason: Buffer) => {
         clearTimeout(timeoutId);
+        this.stopPing();
         this.emit('close', code, reason.toString());
         if (!this.isClosedManually && this.options.reconnect) {
           this.attemptReconnect();
@@ -79,6 +82,7 @@ export class WebSocketManager extends EventEmitter {
 
   async disconnect(): Promise<void> {
     this.isClosedManually = true;
+    this.stopPing();
     return new Promise((resolve) => {
       if (!this.ws || this.ws.readyState === WebSocket.CLOSED) {
         resolve();
@@ -107,6 +111,23 @@ export class WebSocketManager extends EventEmitter {
 
   onClose(handler: CloseHandler): void {
     this.on('close', handler);
+  }
+
+  private startPing(): void {
+    const interval = this.options.pingInterval;
+    if (!interval || interval <= 0) return;
+    this.pingTimer = setInterval(() => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.ping();
+      }
+    }, interval);
+  }
+
+  private stopPing(): void {
+    if (this.pingTimer) {
+      clearInterval(this.pingTimer);
+      this.pingTimer = undefined;
+    }
   }
 
   private attemptReconnect(): void {

@@ -55,6 +55,7 @@ export function createApiRouter(
         headers: body.headers,
         timeout: body.timeout ?? 10000,
         reconnect: body.reconnect ?? false,
+        pingInterval: body.pingInterval,
       });
 
       await manager.connect();
