@@ -725,6 +725,24 @@ button.success:hover {
   background: var(--bg-hover) !important;
 }
 
+/* === GitHub Link === */
+.github-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
 /* === Language Switcher === */
 .lang-switcher {
   display: flex;
