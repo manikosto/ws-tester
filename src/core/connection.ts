@@ -10,6 +10,8 @@ export class WebSocketManager extends EventEmitter {
 
   constructor(options: ConnectionOptions) {
     super();
+    // Prevent unhandled 'error' events from crashing the process
+    this.on('error', () => {});
     this.options = {
       timeout: 10000,
       reconnect: false,
